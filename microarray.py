@@ -1,5 +1,5 @@
 import os, sys
-import re, copy, pickle
+import re, copy, cPickle
 
 class DataSet(object):
 
@@ -10,7 +10,8 @@ class DataSet(object):
     # DataSet.load() method.  To create a data set from previously saved data,
     # use the DataSet.restore() method.
 
-    def __init__(self, attributes, features):
+    def __init__(self, path, attributes, features):
+        self.path = path
         self.features = features
 
         self.type = attributes["Type"]
@@ -133,7 +134,7 @@ class DataSet(object):
                 else:
                     pass
 
-        return DataSet(attributes, features)
+        return DataSet(path, attributes, features)
 
     # Restore {{{1
     @staticmethod
@@ -148,7 +149,7 @@ class DataSet(object):
                 "The argument passed to restore() must be a PKL file path."
 
         with open(path) as file:
-            data_set = pickle.load(file)
+            data_set = cPickle.load(file)
 
             # Make sure the restored object is actually a DataSet.  If some
             # different type of object is unpickled, it could cause really
@@ -169,25 +170,73 @@ class DataSet(object):
                 "The argument passed to save() must be a PKL file path."
 
         with open(path, 'w') as file:
-            pickle.dump(self, file)
+            cPickle.dump(self, file)
 
     # }}}1
-
-    # Prune {{{1
-    def prune(self, criterion):
-        self.features = [ feature
-                for feature in self.features
-                if not criterion(feature) ]
-
-    # Retain {{{1
-    def prune(self, criterion):
-        self.features = [ feature
-                for feature in self.features
-                if criterion(feature) ]
 
     # Sort {{{1
     def sort(self, key, reverse=False):
         self.features.sort(key=key, reverse=(not reverse))
+
+    # Apply {{{1
+    def apply(self, function):
+        self.features = map(function, self.features)
+
+    # Prune {{{1
+    def prune(self, criterion):
+        self.features = [
+                feature for feature in self.features
+                if not criterion(feature) ]
+
+    # Retain {{{1
+    def retain(self, criterion):
+        self.features = [
+                feature for feature in self.features
+                if criterion(feature) ]
+
+    # Select {{{1
+    def select(self, index, default=None):
+        try:
+            return self.features[index]
+        except IndexError:
+            return default
+
+    # Truncate {{{1
+    def truncate(self, features):
+        self.features = self.features[0:features]
+
+    # }}}1
+
+    # Display {{{1
+    def display(self, feature_template, header_template=""):
+        if header_template:
+            print header_template.format(self)
+
+        for feature in self:
+            print feature_template.format(feature)
+
+    # Tabulate {{{1
+    @staticmethod
+    def tabulate(header_template, feature_template, *sets):
+        
+        from sys import stdout
+
+        for data in sets:
+            display = header_template.format(data)
+            stdout.write("{0:<50}".format(display))
+
+        stdout.write('\n')
+
+        lengths = map(len, sets)
+        longest = max(lengths)
+
+        for index in range(longest):
+            for data in sets:
+                feature = data.select(index)
+                display = feature_template.format(feature) if feature else ""
+                stdout.write("{0:<50}".format(display))
+
+            stdout.write('\n')
 
     # }}}1
 
