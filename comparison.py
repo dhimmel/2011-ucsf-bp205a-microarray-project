@@ -34,11 +34,11 @@ reference_inputs = [
         'pickles/B+H/000.pkl', 'pickles/B+H/030.pkl', 
         'pickles/B+H/060.pkl', 'pickles/B+H/180.pkl',
 
-        'pickles/B/000.pkl', 'pickles/B/030.pkl', 
-        'pickles/B/060.pkl', 'pickles/B/180.pkl',
+        'pickles/D/000.pkl', 'pickles/D/030.pkl', 
+        'pickles/D/060.pkl', 'pickles/D/180.pkl',
 
-        'pickles/B/000.pkl', 'pickles/B/030.pkl', 
-        'pickles/B/060.pkl', 'pickles/B/180.pkl' ]
+        'pickles/F/000.pkl', 'pickles/F/030.pkl', 
+        'pickles/F/060.pkl', 'pickles/F/180.pkl' ]
 
 output = 'pickles/ours={0},theirs={1}.pkl'
 
