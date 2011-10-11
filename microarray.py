@@ -235,12 +235,22 @@ class DataSet(object):
     # }}}1
 
     # Display {{{1
-    def display(self, feature_template, header_template=""):
-        if header_template:
-            print header_template.format(self)
+    def display(self, template, header='', path=None):
+        file = sys.stdout if not path else open(path, 'w')
+
+        header = header + '\n'
+        template = template + '\n'
+
+        if header != '\n':
+            line = header + re.sub('\S', '=', header)
+            file.write(line)
 
         for feature in self:
-            print feature_template.format(feature)
+            line = template.format(feature)
+            file.write(line)
+
+        # Don't try to close stdout!
+        if path: file.close()
 
     # Tabulate {{{1
     @staticmethod

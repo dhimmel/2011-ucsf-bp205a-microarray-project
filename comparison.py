@@ -7,7 +7,7 @@ import sys, math
 from pprint import pprint
 from microarray import DataSet
 
-# Inputs {{{1
+# Data Files {{{1
 target_inputs = [
         'pickles/G/000.pkl', 'pickles/G/030.pkl', 
         'pickles/G/060.pkl', 'pickles/G/180.pkl' ]
@@ -40,24 +40,22 @@ reference_inputs = [
         'pickles/B/000.pkl', 'pickles/B/030.pkl', 
         'pickles/B/060.pkl', 'pickles/B/180.pkl' ]
 
-output = 'pickles/sorted.thresholds=1,2.pkl'
+output = 'pickles/ours={0},theirs={1}.pkl'
 
 # }}}1
 
 # Find Interesting Genes {{{1
 def find_interesting_genes(inputs, threshold):
+
+    print "  Restoring pickled data (%d)..." % len(inputs)
     experiment = [ DataSet.restore(input) for input in inputs ]
     uninteresting = lambda feature: abs(feature.normed_ratio) < threshold
 
-    for timepoint, input in zip(experiment, inputs):
-        sys.stderr.write('  Pruning from %s...\n' % input)
-        sys.stderr.flush()
-
+    print "  Pruning uninteresting data (%d)..." % len(inputs)
+    for timepoint in experiment:
         timepoint.prune(uninteresting)
 
-    sys.stderr.write('  Performing union...\n\n')
-    sys.stderr.flush()
-
+    print "  Flattening all timepoints (%d)...\n" % len(inputs)
     target, others = experiment[0], experiment[1:]
     target.union(*others)
 
@@ -74,19 +72,16 @@ def remove_common_genes(target, *references):
 
 # }}}1
 
-sys.stderr.write("Searching for interesting genes in all data sets...\n")
-sys.stderr.flush()
+target_threshold = 2
+reference_threshold = 2
 
-target = find_interesting_genes(target_inputs, threshold=1)
-reference = find_interesting_genes(reference_inputs, threshold=2)
+print "Searching for interesting genes in all data sets."
+target = find_interesting_genes(target_inputs, target_threshold)
+reference = find_interesting_genes(reference_inputs, reference_threshold)
 
-sys.stderr.write("Pruning genes that are not unique to the target...\n")
-sys.stderr.flush()
-
+print "Pruning genes that are not unique to the target."
 target = remove_common_genes(target, reference)
 
-sys.stderr.write("Printing the results to stdout...\n")
-sys.stderr.flush()
-
+print "Saving %d hits for further analysis." % len(target)
+output = output.format(target_threshold, reference_threshold)
 target.save(output)
-target.display("{0.id}")
