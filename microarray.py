@@ -178,6 +178,7 @@ class DataSet(object):
     def sort(self, key, reverse=False):
         self.features.sort(key=key, reverse=(not reverse))
 
+
     # Apply {{{1
     def apply(self, function):
         self.features = map(function, self.features)
@@ -194,6 +195,32 @@ class DataSet(object):
                 feature for feature in self.features
                 if criterion(feature) ]
 
+    # Truncate {{{1
+    def truncate(self, features):
+        self.features = self.features[0:features]
+
+    # }}}1
+    
+    # Union {{{1
+    def union(self, *others):
+        my_set = set(self.features)
+        other_sets = [ set(other.features) for other in others ]
+        self.features = list(my_set.union(*other_sets))
+
+    # Intersection {{{1
+    def intersection(self, *others):
+        my_set = set(self.features)
+        other_sets = [ set(other.features) for other in others ]
+        self.features = list(my_set.intersection(*other_sets))
+
+    # Difference {{{1
+    def difference(self, *others):
+        my_set = set(self.features)
+        other_sets = [ set(other.features) for other in others ]
+        self.features = list(my_set.difference(*other_sets))
+
+    # }}}1
+
     # Select {{{1
     def select(self, index, default=None):
         try:
@@ -201,16 +228,11 @@ class DataSet(object):
         except IndexError:
             return default
 
-    # Truncate {{{1
-    def truncate(self, features):
-        self.features = self.features[0:features]
-
-    # }}}1
-    
-    #Search {{{1
+    # Search {{{1
     def search(self, criterion):
         return [feature for feature in self.features if criterion(feature)]
 
+    # }}}1
 
     # Display {{{1
     def display(self, feature_template, header_template=""):
@@ -270,13 +292,18 @@ class Feature:
         self.block = parameters['Block']
         self.column = parameters['Column']
         self.row = parameters['Row']
-        self.position = self.block, self.row, self.column
         self.name = parameters['Name']
         self.id = parameters['ID']
         self.x = parameters['X']
         self.y = parameters['Y']
         self.diameter = parameters['Dia.']
         self.circularity = parameters['Circularity']
+
+        self.position = self.block, self.row, self.column
+        self.index =                            \
+                (21 * 20) * (self.block - 1) +  \
+                (20)      * (self.column - 1) + \
+                (1)       * (self.row - 1)
 
         self.ratio_of_medians = parameters['Ratio of Medians (635/532)']
         self.ratio_of_means = parameters['Ratio of Means (635/532)']
@@ -341,11 +368,11 @@ class Feature:
 
     # Equality Operator {{{1
     def __eq__(self, other):
-        return self.id == other.id
+        return self.position == other.position
 
     # Hashing Operator {{{1
     def __hash__(self):
-        return hash(self.id)
+        return hash(self.position)
 
     # }}}1
 

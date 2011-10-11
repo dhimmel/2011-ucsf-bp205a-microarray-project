@@ -11,8 +11,8 @@ import re, glob
 directory = sys.argv[1]
 os.chdir(directory)
 
-pattern = r'control.(\d+).txt'
-template = '{0:0>3}.2.gpr'
+pattern = r'(\d+).\d.gpr'
+template = '{0:0>3}.gpr'
 
 for file in glob.glob('*'):
     file = os.path.basename(file)
