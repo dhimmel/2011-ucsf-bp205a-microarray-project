@@ -6,8 +6,8 @@ import sys, math
 from microarray import DataSet
 
 stressors = [
-        #'A', 'A+B', 'A+D', 'A+E', 'A+F',
-        #'B', 'B+H', 'D', 'F', 'G',
+        'A', 'A+B', 'A+D', 'A+E', 'A+F',
+        'B', 'B+H', 'D', 'F', 'G',
         'control.1', 'control.2' ]
 
 # These data sets are screwed up for some reason: B+F, E
@@ -22,11 +22,7 @@ outputs = [
 
 def make_pass(stressor):
 
-    # Print out a status message, because this could take a long time to
-    # finish.
-
-    sys.stdout.write("Parsing data for '%s'...\n" % stressor)
-    sys.stdout.flush()
+    #print "Parsing data for '%s'...\n" % stressor
 
     experiments = [ DataSet.load(input % stressor) for input in inputs ]
     reference = experiments[0]
@@ -61,17 +57,27 @@ def make_pass(stressor):
         def irrational(feature):
             return math.isnan(feature.normed_ratio)
 
-        def too_extreme(feature):
-            return abs(feature.log_ratio) > 15
+        def noisy(feature):
+            return (feature.signal.red.signal_to_noise < 1) or     \
+                   (feature.signal.green.signal_to_noise < 1)
 
-        def empty(feature):
-            return feature.name == 'EMPTY'
-        
+        def unnamed(feature):
+            return feature.name in ('None', 'EMPTY')
+
+        # This filter was proposed by team JKRW.
+        def inconsistent(feature):
+            return feature.regression_quality < 0.5
+
         data.prune(irrational)
-        data.prune(too_extreme)
+        data.prune(noisy)
+        data.prune(unnamed)
+        data.prune(inconsistent)
 
     for data, output in zip(experiments, outputs):
+        print "Saving %d features for '%s'." % (len(data), stressor)
         data.save(output % stressor)
+
+    print
 
 if __name__ == '__main__':
     for stressor in stressors:
