@@ -8,25 +8,19 @@
 import os, sys
 import re, glob
 
-prefix = 'control'
-pattern = r'TeamUSA-Control-([0-9]+)_?([RW][12])?\.([a-z]*)'
+directory = sys.argv[1]
+os.chdir(directory)
 
-os.chdir('control')
+pattern = r'control.(\d+).txt'
+template = '{0:0>3}.2.gpr'
 
 for file in glob.glob('*'):
     file = os.path.basename(file)
     match = re.match(pattern, file)
 
-    timepoint, label, extension = match.groups()
+    if match:
+        timepoint = match.group(1)
+        result = template.format(timepoint)
 
-    if label:
-        template = "control.{0:0>3}.{1}.{2}"
-        fields = timepoint, label, extension
-
-    else:
-        template = "control.{0:0>3}.{1}"
-        fields = timepoint, extension
-
-    os.rename(file, template.format(*fields))
-
-
+        print "mv {} {}".format(file, result)
+        os.rename(file, result)
