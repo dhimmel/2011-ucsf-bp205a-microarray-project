@@ -260,7 +260,8 @@ class DataSet(object):
 
         for data in sets:
             display = header_template.format(data)
-            stdout.write("{0:<50}".format(display))
+            #stdout.write("{0:<50}".format(display))
+            stdout.write(display + '\t\t')
 
         stdout.write('\n')
 
@@ -271,7 +272,8 @@ class DataSet(object):
             for data in sets:
                 feature = data.select(index)
                 display = feature_template.format(feature) if feature else ""
-                stdout.write("{0:<50}".format(display))
+                #stdout.write("{0:<50}".format(display))
+                stdout.write(display + '\t')
 
             stdout.write('\n')
 
