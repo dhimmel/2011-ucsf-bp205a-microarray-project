@@ -206,6 +206,11 @@ class DataSet(object):
         self.features = self.features[0:features]
 
     # }}}1
+    
+    #Search {{{1
+    def search(self, criterion):
+        return [feature for feature in self.features if criterion(feature)]
+
 
     # Display {{{1
     def display(self, feature_template, header_template=""):
@@ -265,6 +270,7 @@ class Feature:
         self.block = parameters['Block']
         self.column = parameters['Column']
         self.row = parameters['Row']
+        self.position = self.block, self.row, self.column
         self.name = parameters['Name']
         self.id = parameters['ID']
         self.x = parameters['X']

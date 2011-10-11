@@ -6,19 +6,21 @@ import math
 from microarray import DataSet
 
 inputs = [
-        'data/A+D.000.gpr',
-        'data/A+D.030.gpr',
-        'data/A+D.060.gpr',
-        'data/A+D.180.gpr' ]
+        '/Users/ucsf/ucsf/etal/Team-Kale-088.gpr',
+        '/Users/ucsf/ucsf/etal/Team-Kale-089.gpr',
+        '/Users/ucsf/ucsf/etal/Team-Kale-090.gpr',
+        '/Users/ucsf/ucsf/etal/Team-Kale-010.gpr' ]
 
 outputs = [
-        'pickles/A+D.000.pkl',
-        'pickles/A+D.030.pkl',
-        'pickles/A+D.060.pkl',
-        'pickles/A+D.180.pkl' ]
+        '/Users/ucsf/ucsf/pickles/A+D.000.pkl',
+        '/Users/ucsf/ucsf/pickles/A+D.030.pkl',
+        '/Users/ucsf/ucsf/pickles/A+D.060.pkl',
+        '/Users/ucsf/ucsf/pickles/A+D.180.pkl' ]
 
 header = "{0.path} (R/G = {0.intensity_ratio})"
 row = "{0.id:<15} {0.log_ratio}"
+
+data0 = DataSet.load(inputs[0])
 
 for input, output in zip(inputs, outputs):
     data = DataSet.load(input)
@@ -44,6 +46,10 @@ for input, output in zip(inputs, outputs):
 
     def too_extreme(feature):
         return abs(feature.log_ratio) > 15
+    
+    def norm_zero(feature):
+        feature.log_ratio_norm_zero = feature.log_ratio - data0.search(criterion = lambda a: a.position==feature.position)[0].log_ratio 
+        return feature
 
     data.apply(correction)
 
