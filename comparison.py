@@ -7,7 +7,45 @@ import sys, math
 from pprint import pprint
 from microarray import DataSet
 
-# Data Files {{{1
+# G Parameters {{{1
+target_inputs = [
+        'pickles/G/000.pkl', 'pickles/G/030.pkl', 
+        'pickles/G/060.pkl', 'pickles/G/180.pkl' ]
+
+related_inputs = []
+
+unrelated_inputs = [
+        'pickles/A/000.pkl', 'pickles/A/030.pkl',
+        'pickles/A/060.pkl', 'pickles/A/180.pkl',
+
+        'pickles/A+B/000.pkl', 'pickles/A+B/030.pkl',
+        'pickles/A+B/060.pkl', 'pickles/A+B/180.pkl',
+
+        'pickles/A+D/000.pkl', 'pickles/A+D/030.pkl',
+        'pickles/A+D/060.pkl', 'pickles/A+D/180.pkl',
+
+        'pickles/A+E/000.pkl', 'pickles/A+E/030.pkl',
+        'pickles/A+E/060.pkl', 'pickles/A+E/180.pkl',
+
+        'pickles/A+F/000.pkl', 'pickles/A+F/030.pkl',
+        'pickles/A+F/060.pkl', 'pickles/A+F/180.pkl',
+
+        'pickles/D/000.pkl', 'pickles/D/030.pkl', 
+        'pickles/D/060.pkl', 'pickles/D/180.pkl',
+
+        'pickles/B/000.pkl', 'pickles/B/030.pkl', 
+        'pickles/B/060.pkl', 'pickles/B/180.pkl',
+
+        'pickles/B+H/000.pkl', 'pickles/B+H/030.pkl', 
+        'pickles/B+H/060.pkl', 'pickles/B+H/180.pkl',
+
+        'pickles/F/000.pkl', 'pickles/F/030.pkl', 
+        'pickles/F/060.pkl', 'pickles/F/180.pkl' ]
+
+output = 'pickles/G/ours={0},theirs={1}.pkl'
+
+# }}}1
+# A+D Parameters {{{1
 target_inputs = [
         'pickles/A+D/000.pkl', 'pickles/A+D/030.pkl', 
         'pickles/A+D/060.pkl', 'pickles/A+D/180.pkl' ]
