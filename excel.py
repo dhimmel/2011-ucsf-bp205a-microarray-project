@@ -4,8 +4,8 @@
 from microarray import DataSet
 
 inputs = [
-        'pickles/G/000.pkl', 'pickles/G/030.pkl', 
-        'pickles/G/060.pkl', 'pickles/G/180.pkl' ] 
+        'pickles/control.2/000.pkl', 'pickles/control.2/030.pkl', 
+        'pickles/control.2/060.pkl', 'pickles/control.2/180.pkl' ] 
 
 experiments = [
         DataSet.restore(input)

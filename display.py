@@ -3,8 +3,8 @@
 
 from microarray import DataSet
 
-input = 'pickles/ours=2,theirs=2.pkl'
-output = 'output/ours=2,theirs=2.txt'
+input = 'pickles/A+D/ours=2,theirs=1.5.pkl'
+output = 'output/A+D.ours=2,theirs=1.5.txt'
 
 # Display a number of useful parameters:
 header = '{:<15}{:<15}{:<20}{:<20}{:<20}'.format("Gene_ID", "Gene_Name", "Expression_Level", "Signal_Quality", "Regression")

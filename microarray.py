@@ -178,7 +178,6 @@ class DataSet(object):
     def sort(self, key, reverse=False):
         self.features.sort(key=key, reverse=(not reverse))
 
-
     # Apply {{{1
     def apply(self, function):
         self.features = map(function, self.features)
@@ -269,13 +268,16 @@ class DataSet(object):
         longest = max(lengths)
 
         for index in range(longest):
+            columns = []
+
             for data in sets:
                 feature = data.select(index)
-                display = feature_template.format(feature) if feature else ""
-                #stdout.write("{0:<50}".format(display))
-                stdout.write(display + '\t')
+                column = feature_template.format(feature) if feature else ""
+                columns.append(column)
 
-            stdout.write('\n')
+            line = '\t'.join(columns) + '\n'
+            #stdout.write("{0:<50}".format(display))
+            stdout.write(line)
 
     # }}}1
 
