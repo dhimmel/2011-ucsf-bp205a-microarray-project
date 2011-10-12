@@ -2,53 +2,83 @@
 
 from __future__ import division
 
-import math
+import sys, math
 from microarray import DataSet
 
+stressors = [
+        'A', 'A+B', 'A+D', 'A+E', 'A+F',
+        'B', 'B+H', 'D', 'F', 'G',
+        'control.1', 'control.2' ]
+
+# These data sets are screwed up for some reason: B+F, E
+
 inputs = [
-        'data/G/000.gpr', 'data/G/030.gpr',
-        'data/G/060.gpr', 'data/G/180.gpr' ]
+        'data/%s/000.gpr', 'data/%s/030.gpr',
+        'data/%s/060.gpr', 'data/%s/180.gpr' ]
 
 outputs = [
-        'pickles/G/000.pkl', 'pickles/G/030.pkl',
-        'pickles/G/060.pkl', 'pickles/G/180.pkl' ]
+        'pickles/%s/000.pkl', 'pickles/%s/030.pkl',
+        'pickles/%s/060.pkl', 'pickles/%s/180.pkl' ]
 
-header = "{0.path} (R/G = {0.intensity_ratio})"
-row = "{0.id:<15} {0.log_ratio}"
+def make_pass(stressor):
 
-reference = DataSet.load(inputs[0])
+    #print "Parsing data for '%s'...\n" % stressor
 
-for input, output in zip(inputs, outputs):
-    data = DataSet.load(input)
+    experiments = [ DataSet.load(input % stressor) for input in inputs ]
+    reference = experiments[0]
 
-    # Find the ratio between the amount of red and green fluorescence that was
-    # detected.  This ratio is assumed to be one for most data analysis
-    # purposes, so the raw data needs to be corrected.
+    for data in experiments:
 
-    green, red = 0, 0
-    for feature in data:
-        red += feature.signal.red.intensity
-        green += feature.signal.green.intensity
+        # Find the ratio between the amount of red and green fluorescence that was
+        # detected.  This ratio is assumed to be one for most data analysis
+        # purposes, so the raw data needs to be corrected.
 
-    data.intensity_ratio = red / green
-    data.log_ratio = math.log(red / green, 2)
+        green, red = 0, 0
+        for feature in data:
+            red += feature.signal.red.intensity
+            green += feature.signal.green.intensity
 
-    def correction(feature):
-        feature.log_ratio -= data.log_ratio
-        return feature
+        data.intensity_ratio = red / green
+        data.log_ratio = math.log(red / green, 2)
 
-    def irrational(feature):
-        return math.isnan(feature.log_ratio)
+        def correction(feature):
+            feature.log_ratio -= data.log_ratio
+            return feature
 
-    def too_extreme(feature):
-        return abs(feature.log_ratio) > 15
-    
-    data.apply(correction)
+        data.apply(correction)
 
-    for feature, zero in zip(data, reference):
-        feature.log_ratio -= zero.log_ratio
+    for data in experiments:
 
-    data.prune(irrational)
-    data.prune(too_extreme)
+        for feature, zero in zip(data, reference):
+            feature.normed_ratio = feature.log_ratio - zero.log_ratio
 
-    data.save(output)
+    for data in experiments:
+
+        def irrational(feature):
+            return math.isnan(feature.normed_ratio)
+
+        def noisy(feature):
+            return (feature.signal.red.signal_to_noise < 1) or     \
+                   (feature.signal.green.signal_to_noise < 1)
+
+        def unnamed(feature):
+            return feature.name in ('None', 'EMPTY')
+
+        # This filter was proposed by team JKRW.
+        def inconsistent(feature):
+            return feature.regression_quality < 0.5
+
+        data.prune(irrational)
+        data.prune(noisy)
+        data.prune(unnamed)
+        data.prune(inconsistent)
+
+    for data, output in zip(experiments, outputs):
+        print "Saving %d features for '%s'." % (len(data), stressor)
+        data.save(output % stressor)
+
+    print
+
+if __name__ == '__main__':
+    for stressor in stressors:
+        make_pass(stressor)

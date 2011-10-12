@@ -194,6 +194,32 @@ class DataSet(object):
                 feature for feature in self.features
                 if criterion(feature) ]
 
+    # Truncate {{{1
+    def truncate(self, features):
+        self.features = self.features[0:features]
+
+    # }}}1
+    
+    # Union {{{1
+    def union(self, *others):
+        my_set = set(self.features)
+        other_sets = [ set(other.features) for other in others ]
+        self.features = list(my_set.union(*other_sets))
+
+    # Intersection {{{1
+    def intersection(self, *others):
+        my_set = set(self.features)
+        other_sets = [ set(other.features) for other in others ]
+        self.features = list(my_set.intersection(*other_sets))
+
+    # Difference {{{1
+    def difference(self, *others):
+        my_set = set(self.features)
+        other_sets = [ set(other.features) for other in others ]
+        self.features = list(my_set.difference(*other_sets))
+
+    # }}}1
+
     # Select {{{1
     def select(self, index, default=None):
         try:
@@ -201,24 +227,29 @@ class DataSet(object):
         except IndexError:
             return default
 
-    # Truncate {{{1
-    def truncate(self, features):
-        self.features = self.features[0:features]
-
-    # }}}1
-    
-    #Search {{{1
+    # Search {{{1
     def search(self, criterion):
         return [feature for feature in self.features if criterion(feature)]
 
+    # }}}1
 
     # Display {{{1
-    def display(self, feature_template, header_template=""):
-        if header_template:
-            print header_template.format(self)
+    def display(self, template, header='', path=None):
+        file = sys.stdout if not path else open(path, 'w')
+
+        header = header + '\n'
+        template = template + '\n'
+
+        if header != '\n':
+            line = header + re.sub('\S', '=', header)
+            file.write(line)
 
         for feature in self:
-            print feature_template.format(feature)
+            line = template.format(feature)
+            file.write(line)
+
+        # Don't try to close stdout!
+        if path: file.close()
 
     # Tabulate {{{1
     @staticmethod
@@ -228,7 +259,8 @@ class DataSet(object):
 
         for data in sets:
             display = header_template.format(data)
-            stdout.write("{0:<50}".format(display))
+            #stdout.write("{0:<50}".format(display))
+            stdout.write(display + '\t\t')
 
         stdout.write('\n')
 
@@ -236,12 +268,16 @@ class DataSet(object):
         longest = max(lengths)
 
         for index in range(longest):
+            columns = []
+
             for data in sets:
                 feature = data.select(index)
-                display = feature_template.format(feature) if feature else ""
-                stdout.write("{0:<50}".format(display))
+                column = feature_template.format(feature) if feature else ""
+                columns.append(column)
 
-            stdout.write('\n')
+            line = '\t'.join(columns) + '\n'
+            #stdout.write("{0:<50}".format(display))
+            stdout.write(line)
 
     # }}}1
 
@@ -270,13 +306,18 @@ class Feature:
         self.block = parameters['Block']
         self.column = parameters['Column']
         self.row = parameters['Row']
-        self.position = self.block, self.row, self.column
         self.name = parameters['Name']
         self.id = parameters['ID']
         self.x = parameters['X']
         self.y = parameters['Y']
         self.diameter = parameters['Dia.']
         self.circularity = parameters['Circularity']
+
+        self.position = self.block, self.row, self.column
+        self.index =                            \
+                (21 * 20) * (self.block - 1) +  \
+                (20)      * (self.column - 1) + \
+                (1)       * (self.row - 1)
 
         self.ratio_of_medians = parameters['Ratio of Medians (635/532)']
         self.ratio_of_means = parameters['Ratio of Means (635/532)']
@@ -341,11 +382,11 @@ class Feature:
 
     # Equality Operator {{{1
     def __eq__(self, other):
-        return self.id == other.id
+        return self.position == other.position
 
     # Hashing Operator {{{1
     def __hash__(self):
-        return hash(self.id)
+        return hash(self.position)
 
     # }}}1
 
